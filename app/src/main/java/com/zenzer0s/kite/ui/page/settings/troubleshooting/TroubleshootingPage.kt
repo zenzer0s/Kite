@@ -1,6 +1,14 @@
 package com.zenzer0s.kite.ui.page.settings.troubleshooting
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,7 +71,7 @@ fun TroubleShootingPage(
         title = stringResource(R.string.trouble_shooting),
         onBack = onBack,
     ) {
-        LazyColumn(contentPadding = it) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             item {
                 OutlinedCard(modifier = Modifier.padding(16.dp)) {
                     PreferenceInfo(
@@ -71,7 +79,8 @@ fun TroubleShootingPage(
                         text = stringResource(R.string.issue_tracker_hint),
                     )
                     val knownIssueUrlSeal = "https://github.com/JunkFood02/Seal/issues/1399"
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 2)),
                         title = "Seal Issue Tracker",
                         description = null,
                         icon = Icons.AutoMirrored.Outlined.OpenInNew,
@@ -79,7 +88,8 @@ fun TroubleShootingPage(
                     )
 
                     val knownIssueUrlYtdlp = "https://github.com/yt-dlp/yt-dlp/issues/3766"
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 2)),
                         title = "yt-dlp Issue Tracker",
                         description = null,
                         icon = Icons.AutoMirrored.Outlined.OpenInNew,
@@ -100,10 +110,11 @@ fun TroubleShootingPage(
                             ?: context.getString(R.string.ytdlp_update)
                     )
                 }
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(id = R.string.ytdlp_update_action),
                     description = ytdlpVersion,
-                    leadingIcon = {
+                    leadingContent = {
                         if (isUpdating) {
                             CircularProgressIndicator(
                                 modifier =
@@ -146,8 +157,7 @@ fun TroubleShootingPage(
                             isUpdating = false
                         }
                     },
-                    onClickLabel = stringResource(id = R.string.update),
-                    trailingIcon = {
+                                        trailingContent = {
                         IconButton(onClick = { showYtdlpDialog = true }) {
                             Icon(
                                 imageVector = Icons.Outlined.Settings,
@@ -163,7 +173,8 @@ fun TroubleShootingPage(
 
             item { PreferenceSubtitle(text = stringResource(R.string.network)) }
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(R.string.cookies),
                     description = stringResource(R.string.cookies_desc),
                     icon = Icons.Outlined.Cookie,
@@ -173,11 +184,12 @@ fun TroubleShootingPage(
             item { PreferenceSubtitle(text = stringResource(R.string.download_directory)) }
             item {
                 var restrictFilenames by RESTRICT_FILENAMES.booleanState
-                PreferenceSwitch(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(id = R.string.restrict_filenames),
                     icon = Icons.Outlined.Spellcheck,
                     description = stringResource(id = R.string.restrict_filenames_desc),
-                    isChecked = restrictFilenames,
+                    checked = restrictFilenames,
                 ) {
                     restrictFilenames = !restrictFilenames
                     RESTRICT_FILENAMES.updateBoolean(restrictFilenames)

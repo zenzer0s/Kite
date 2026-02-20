@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import com.zenzer0s.kite.util.NotificationUtil
@@ -27,16 +26,10 @@ class DownloadService : Service() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d(TAG, "onUnbind: ")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        } else {
-            stopForeground(true)
-        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
         return super.onUnbind(intent)
     }
 
-    inner class DownloadServiceBinder : Binder() {
-        fun getService(): DownloadService = this@DownloadService
-    }
+    class DownloadServiceBinder : Binder()
 }

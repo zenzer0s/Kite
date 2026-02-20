@@ -1,6 +1,12 @@
 package com.zenzer0s.kite.ui.page.settings.general
 
 import android.Manifest
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -157,16 +163,19 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
         )
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(text = stringResource(id = R.string.general_settings)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(text = stringResource(id = R.string.general_settings)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = {
             val isCustomCommandEnabled by remember { mutableStateOf(CUSTOM_COMMAND.getBoolean()) }
-            LazyColumn(modifier = Modifier, contentPadding = it) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 //                item {
                 //                    SettingTitle(text = stringResource(id =
                 // R.string.general_settings))
@@ -184,10 +193,11 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                                 ?: context.getString(R.string.ytdlp_update)
                         )
                     }
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 5)),
                         title = stringResource(id = R.string.ytdlp_update_action),
                         description = ytdlpVersion,
-                        leadingIcon = {
+                        leadingContent = {
                             if (isUpdating) UpdateProgressIndicator()
                             else {
                                 Icon(
@@ -221,8 +231,7 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                                 isUpdating = false
                             }
                         },
-                        onClickLabel = stringResource(id = R.string.update),
-                        trailingIcon = {
+                                                trailingContent = {
                             IconButton(onClick = { showYtdlpDialog = true }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
@@ -233,7 +242,8 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 5)),
                         title = stringResource(id = R.string.download_notification),
                         description =
                             stringResource(
@@ -246,8 +256,8 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                             if (!isNotificationPermissionGranted) Icons.Outlined.NotificationsOff
                             else if (!downloadNotification) Icons.Outlined.Notifications
                             else Icons.Outlined.NotificationsActive,
-                        isChecked = downloadNotification && isNotificationPermissionGranted,
-                        onClick = {
+                        checked = downloadNotification && isNotificationPermissionGranted,
+                        onCheckedChange = { _ ->
                             if (notificationPermission?.status is PermissionStatus.Denied) {
                                 showNotificationDialog = true
                             } else if (isNotificationPermissionGranted) {
@@ -261,14 +271,15 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
 
                 item {
                     var configureBeforeDownload by CONFIGURE.booleanState
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 5)),
                         title = stringResource(id = R.string.settings_before_download),
                         description = stringResource(id = R.string.settings_before_download_desc),
                         icon =
                             if (configureBeforeDownload) Icons.Outlined.DoneAll
                             else Icons.Outlined.RemoveDone,
-                        isChecked = configureBeforeDownload,
-                        onClick = {
+                        checked = configureBeforeDownload,
+                        onCheckedChange = { _ ->
                             configureBeforeDownload = !configureBeforeDownload
                             PreferenceUtil.updateValue(CONFIGURE, configureBeforeDownload)
                         },
@@ -277,61 +288,65 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
 
                 item {
                     var thumbnailSwitch by remember { mutableStateOf(THUMBNAIL.getBoolean()) }
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 5)),
                         title = stringResource(id = R.string.create_thumbnail),
                         description = stringResource(id = R.string.create_thumbnail_summary),
                         enabled = !isCustomCommandEnabled,
                         icon = Icons.Outlined.Image,
-                        isChecked = thumbnailSwitch,
-                        onClick = {
+                        checked = thumbnailSwitch,
+                        onCheckedChange = { _ ->
                             thumbnailSwitch = !thumbnailSwitch
                             PreferenceUtil.updateValue(THUMBNAIL, thumbnailSwitch)
                         },
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 5)),
                         title = stringResource(R.string.print_details),
                         description = stringResource(R.string.print_details_desc),
                         icon =
                             if (displayErrorReport) Icons.Outlined.Print
                             else Icons.Outlined.PrintDisabled,
                         enabled = !isCustomCommandEnabled,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             displayErrorReport = !displayErrorReport
                             PreferenceUtil.updateValue(DEBUG, displayErrorReport)
                         },
-                        isChecked = displayErrorReport,
+                        checked = displayErrorReport,
                     )
                 }
 
                 item { PreferenceSubtitle(text = stringResource(id = R.string.privacy)) }
 
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 2)),
                         title = stringResource(R.string.private_mode),
                         description = stringResource(R.string.private_mode_desc),
                         icon =
                             if (isPrivateModeEnabled) Icons.Outlined.HistoryToggleOff
                             else Icons.Outlined.History,
-                        isChecked = isPrivateModeEnabled,
+                        checked = isPrivateModeEnabled,
                         enabled = !isCustomCommandEnabled,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             isPrivateModeEnabled = !isPrivateModeEnabled
                             PreferenceUtil.updateValue(PRIVATE_MODE, isPrivateModeEnabled)
                         },
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 2)),
                         title = stringResource(R.string.disable_preview),
                         description = stringResource(R.string.disable_preview_desc),
                         icon =
                             if (isPreviewDisabled) Icons.Outlined.VisibilityOff
                             else Icons.Outlined.Visibility,
-                        isChecked = isPreviewDisabled,
+                        checked = isPreviewDisabled,
                         enabled = !isCustomCommandEnabled,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             isPreviewDisabled = !isPreviewDisabled
                             PreferenceUtil.updateValue(DISABLE_PREVIEW, isPreviewDisabled)
                         },
@@ -340,21 +355,23 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
 
                 item { PreferenceSubtitle(text = stringResource(R.string.advanced_settings)) }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 3)),
                         title = stringResource(id = R.string.download_playlist),
-                        onClick = {
+                        onCheckedChange = { _ ->
                             downloadPlaylist = !downloadPlaylist
                             PreferenceUtil.updateValue(PLAYLIST, downloadPlaylist)
                         },
                         icon = Icons.Outlined.PlaylistAddCheck,
                         enabled = !isCustomCommandEnabled,
                         description = stringResource(R.string.download_playlist_desc),
-                        isChecked = downloadPlaylist,
+                        checked = downloadPlaylist,
                     )
                 }
 
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 3)),
                         title = stringResource(id = R.string.download_archive),
                         onClick = {
                             scope.launch(Dispatchers.IO) {
@@ -364,8 +381,8 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                         },
                         icon = Icons.Outlined.Archive,
                         description = stringResource(R.string.download_archive_desc),
-                        isChecked = useDownloadArchive,
-                        onChecked = {
+                        checked = useDownloadArchive,
+                        onCheckedChange = {
                             useDownloadArchive = !useDownloadArchive
                             DOWNLOAD_ARCHIVE.updateBoolean(useDownloadArchive)
                         },
@@ -374,13 +391,14 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                 }
 
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 3)),
                         title = stringResource(R.string.sponsorblock),
                         description = stringResource(R.string.sponsorblock_desc),
                         icon = Icons.Outlined.MoneyOff,
                         enabled = !isCustomCommandEnabled,
-                        isChecked = isSponsorBlockEnabled,
-                        onChecked = {
+                        checked = isSponsorBlockEnabled,
+                        onCheckedChange = {
                             isSponsorBlockEnabled = !isSponsorBlockEnabled
                             PreferenceUtil.updateValue(SPONSORBLOCK, isSponsorBlockEnabled)
                         },

@@ -28,7 +28,6 @@ import java.util.concurrent.CancellationException
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -313,33 +312,6 @@ object Downloader {
             }
     }
 
-    fun addToDownloadQueue(
-        videoInfo: VideoInfo? = null,
-        url: String = videoInfo?.originalUrl ?: "",
-        preferences: DownloadUtil.DownloadPreferences =
-            DownloadUtil.DownloadPreferences.createFromPreferences(),
-    ) {
-        require(url.isNotEmpty() || videoInfo != null)
-
-        if (!isDownloaderAvailable()) {
-            ToastUtil.makeToast(R.string.task_added)
-            applicationScope
-                .launch(Dispatchers.Default) {
-                    while (!isDownloaderAvailable()) {
-                        delay(3000)
-                    }
-                }
-                .invokeOnCompletion {
-                    videoInfo?.let {
-                        downloadVideoWithInfo(info = videoInfo, preferences = preferences)
-                    } ?: getInfoAndDownload(url, preferences)
-                }
-        } else {
-            videoInfo?.let { downloadVideoWithInfo(info = videoInfo, preferences = preferences) }
-                ?: getInfoAndDownload(url, preferences)
-        }
-    }
-
     fun downloadVideoWithInfo(
         info: VideoInfo,
         preferences: DownloadUtil.DownloadPreferences =
@@ -359,7 +331,7 @@ object Downloader {
      * @see getInfoAndDownload
      */
     @CheckResult
-    private suspend fun downloadVideo(
+    private fun downloadVideo(
         playlistIndex: Int = 0,
         playlistUrl: String = "",
         videoInfo: VideoInfo,

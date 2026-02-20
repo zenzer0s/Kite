@@ -1,6 +1,16 @@
 package com.zenzer0s.kite.ui.page.settings.format
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -96,9 +106,11 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(modifier = Modifier, text = stringResource(id = R.string.subtitle))
                 },
                 navigationIcon = { BackButton { onNavigateBack() } },
@@ -106,7 +118,8 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
             )
         },
         content = {
-            LazyColumn(modifier = Modifier, contentPadding = it) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 item {
                     PreferenceSwitchWithContainer(
                         title = stringResource(id = R.string.download_subtitles),
@@ -119,7 +132,8 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
                     )
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 4)),
                         title = stringResource(id = R.string.subtitle_language),
                         icon = Icons.Outlined.Language,
                         description = subtitleLang,
@@ -128,7 +142,8 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
                 }
 
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 4)),
                         title = stringResource(id = R.string.convert_subtitle),
                         description = subtitleFormatText,
                         icon = Icons.Outlined.Sync,
@@ -138,12 +153,13 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
                 }
 
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 4)),
                         title = stringResource(id = R.string.auto_subtitle),
                         icon = Icons.Outlined.ClosedCaption,
                         description = stringResource(id = R.string.auto_subtitle_desc),
-                        isChecked = autoSubtitle,
-                        onClick = {
+                        checked = autoSubtitle,
+                        onCheckedChange = { _ ->
                             autoSubtitle = !autoSubtitle
                             AUTO_SUBTITLE.updateBoolean(autoSubtitle)
                         },
@@ -151,10 +167,11 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
                 }
 
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 4)),
                         title = stringResource(id = R.string.auto_translated_subtitles),
                         icon = Icons.Outlined.Translate,
-                        isChecked = autoTranslatedSubtitle,
+                        checked = autoTranslatedSubtitle,
                         enabled = autoSubtitle,
                     ) {
                         if (!autoTranslatedSubtitle) {
@@ -168,12 +185,13 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
 
                 item {
                     androidx.compose.material3.HorizontalDivider()
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 2)),
                         title = stringResource(id = R.string.embed_subtitles),
                         description = stringResource(id = R.string.embed_subtitles_desc),
-                        isChecked = embedSubtitle,
+                        checked = embedSubtitle,
                         enabled = !downloadAudio,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             if (embedSubtitle) {
                                 embedSubtitle = false
                                 EMBED_SUBTITLE.updateBoolean(false)
@@ -188,12 +206,13 @@ fun SubtitlePreference(onNavigateBack: () -> Unit) {
                 item {
                     Column {
                         var keepSubtitles by KEEP_SUBTITLE_FILES.booleanState
-                        PreferenceSwitch(
+                        KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 2)),
                             title = stringResource(id = R.string.keep_subtitle_files),
                             description = null,
-                            isChecked = keepSubtitles,
+                            checked = keepSubtitles,
                             enabled = !downloadAudio && embedSubtitle,
-                            onClick = {
+                            onCheckedChange = { _ ->
                                 keepSubtitles = !keepSubtitles
                                 KEEP_SUBTITLE_FILES.updateBoolean(keepSubtitles)
                             },

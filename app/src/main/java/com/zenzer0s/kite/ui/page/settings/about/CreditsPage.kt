@@ -1,6 +1,9 @@
 package com.zenzer0s.kite.ui.page.settings.about
 
 import androidx.compose.foundation.Image
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -109,7 +112,7 @@ fun CreditsPage(onNavigateBack: () -> Unit) {
             )
         },
         content = {
-            LazyColumn(modifier = Modifier.padding(it)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 item {
                     Surface(
                         modifier =

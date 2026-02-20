@@ -3,6 +3,12 @@
 package com.zenzer0s.kite.ui.page.settings.directory
 
 import android.Manifest
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -233,12 +239,14 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         snackbarHost = {
             SnackbarHost(modifier = Modifier.systemBarsPadding(), hostState = snackbarHostState)
         },
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(
                         modifier = Modifier,
                         text = stringResource(id = R.string.download_directory),
@@ -249,7 +257,8 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
             )
         },
     ) {
-        LazyColumn(modifier = Modifier, contentPadding = it) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             if (isCustomCommandEnabled)
                 item {
                     PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
@@ -275,9 +284,11 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     }
                 }
             item { PreferenceSubtitle(text = stringResource(R.string.general_settings)) }
+            val generalTotal = if (!isCustomCommandEnabled) 5 else 3
             if (!isCustomCommandEnabled) {
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, generalTotal)),
                         title = stringResource(id = R.string.video_directory),
                         description = videoDirectoryText,
                         enabled = !isPrivateDirectoryEnabled && !sdcardDownload,
@@ -287,7 +298,8 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, generalTotal)),
                         title = stringResource(id = R.string.audio_directory),
                         description = audioDirectoryText,
                         enabled = !isPrivateDirectoryEnabled && !sdcardDownload,
@@ -298,7 +310,8 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                 }
             }
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(if (!isCustomCommandEnabled) 2 else 0, generalTotal)),
                     title = stringResource(id = R.string.custom_command_directory),
                     description =
                         customCommandDirectory.ifEmpty {
@@ -310,14 +323,14 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                 }
             }
             item {
-                PreferenceSwitchWithDivider(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(if (!isCustomCommandEnabled) 3 else 1, generalTotal)),
                     title = stringResource(id = R.string.sdcard_directory),
                     description =
                         sdcardUri.ifEmpty { stringResource(id = R.string.set_directory_desc) },
-                    isChecked = sdcardDownload,
+                    checked = sdcardDownload,
                     enabled = !isCustomCommandEnabled,
-                    isSwitchEnabled = !isCustomCommandEnabled,
-                    onChecked = {
+                    onCheckedChange = {
                         if (sdcardUri.isNotEmpty()) {
                             sdcardDownload = !sdcardDownload
                             PreferenceUtil.updateValue(SDCARD_DOWNLOAD, sdcardDownload)
@@ -330,7 +343,8 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                 )
             }
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(if (!isCustomCommandEnabled) 4 else 2, generalTotal)),
                     title = stringResource(id = R.string.subdirectory),
                     description = stringResource(id = R.string.subdirectory_desc),
                     icon = Icons.Outlined.SnippetFolder,
@@ -341,13 +355,14 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
             }
             item { PreferenceSubtitle(text = stringResource(R.string.privacy)) }
             item {
-                PreferenceSwitch(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(id = R.string.private_directory),
                     description = stringResource(R.string.private_directory_desc),
                     icon = Icons.Outlined.TabUnselected,
                     enabled = !showDirectoryAlert && !sdcardDownload && !isCustomCommandEnabled,
-                    isChecked = isPrivateDirectoryEnabled,
-                    onClick = {
+                    checked = isPrivateDirectoryEnabled,
+                    onCheckedChange = { _ ->
                         isPrivateDirectoryEnabled = !isPrivateDirectoryEnabled
                         PreferenceUtil.updateValue(PRIVATE_DIRECTORY, isPrivateDirectoryEnabled)
                     },
@@ -355,7 +370,8 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
             }
             item { PreferenceSubtitle(text = stringResource(R.string.advanced_settings)) }
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 3)),
                     title = stringResource(R.string.output_template),
                     description = stringResource(id = R.string.output_template_desc),
                     icon = Icons.Outlined.FolderSpecial,
@@ -365,18 +381,20 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
             }
             item {
                 var restrictFilenames by RESTRICT_FILENAMES.booleanState
-                PreferenceSwitch(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 3)),
                     title = stringResource(id = R.string.restrict_filenames),
                     icon = Icons.Outlined.Spellcheck,
                     description = stringResource(id = R.string.restrict_filenames_desc),
-                    isChecked = restrictFilenames,
+                    checked = restrictFilenames,
                 ) {
                     restrictFilenames = !restrictFilenames
                     RESTRICT_FILENAMES.updateBoolean(restrictFilenames)
                 }
             }
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 3)),
                     title = stringResource(R.string.clear_temp_files),
                     description = stringResource(R.string.clear_temp_files_desc),
                     icon = Icons.Outlined.FolderDelete,

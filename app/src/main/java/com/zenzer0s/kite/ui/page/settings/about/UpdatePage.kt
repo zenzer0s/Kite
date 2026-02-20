@@ -1,6 +1,12 @@
 package com.zenzer0s.kite.ui.page.settings.about
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -75,9 +81,11 @@ fun UpdatePage(onNavigateBack: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(modifier = Modifier, text = stringResource(id = R.string.auto_update))
                 },
                 navigationIcon = { BackButton { onNavigateBack() } },
@@ -85,7 +93,7 @@ fun UpdatePage(onNavigateBack: () -> Unit) {
             )
         },
         content = { paddings ->
-            LazyColumn(modifier = Modifier.padding(paddings)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(paddings), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 item {
                     PreferenceSwitchWithContainer(
                         title = stringResource(id = R.string.enable_auto_update),

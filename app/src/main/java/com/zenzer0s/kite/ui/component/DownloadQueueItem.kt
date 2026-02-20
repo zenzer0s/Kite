@@ -37,9 +37,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,13 +58,6 @@ import com.zenzer0s.kite.ui.theme.harmonizeWithPrimary
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
 import com.kyant.monet.dynamicColorScheme
-
-@Composable
-// @Preview
-fun PlaylistPreview() {
-    var selected by remember { mutableStateOf(false) }
-    Column() { PreviewThemeLight { PlaylistItem(selected = selected) { selected = !selected } } }
-}
 
 @Composable
 fun PlaylistItem(
@@ -154,7 +144,6 @@ val GreenTonalPalettes = Color.Green.toTonalPalettes()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomCommandTaskItem(
-    modifier: Modifier = Modifier,
     status: TaskStatus = TaskStatus.ERROR,
     progress: Float = .85f,
     url: String = "https://www.example.com",
@@ -206,16 +195,6 @@ fun CustomCommandTaskItem(
                 onSurfaceVariant.harmonizeWith(other = accentColor)
             }
 
-        val labelText =
-            stringResource(
-                id =
-                    when (status) {
-                        TaskStatus.FINISHED -> R.string.status_completed
-                        TaskStatus.CANCELED -> R.string.status_canceled
-                        TaskStatus.RUNNING -> R.string.status_downloading
-                        TaskStatus.ERROR -> R.string.status_error
-                    }
-            )
         Surface(color = containerColor, shape = CardDefaults.shape) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(

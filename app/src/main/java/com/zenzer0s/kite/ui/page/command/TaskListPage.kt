@@ -151,7 +151,6 @@ fun TaskListPage(onNavigateBack: () -> Unit, onNavigateToDetail: (Int) -> Unit) 
                         onRestart = { onRestart() },
                         onCopyLog = { onCopyLog(clipboardManager) },
                         onShowLog = { onNavigateToDetail(hashCode()) },
-                        modifier = Modifier.animateItem(),
                     )
                 }
             }

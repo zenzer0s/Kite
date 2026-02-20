@@ -1,5 +1,6 @@
 package com.zenzer0s.kite.ui.page.downloadv2
 
+import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationState
@@ -34,13 +35,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,7 +69,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -79,7 +79,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -128,7 +127,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-private const val TAG = "DownloadPageV2"
 
 enum class Filter {
     All,
@@ -147,9 +145,9 @@ enum class Filter {
         }
 
     fun predict(entry: Pair<Task, Task.State>): Boolean {
-        if (this == All) return true
         val state = entry.second.downloadState
         return when (this) {
+            All -> true
             Downloading -> {
                 when (state) {
                     is FetchingInfo,
@@ -160,13 +158,10 @@ enum class Filter {
                 }
             }
             Canceled -> {
-                state is Error || state is Task.DownloadState.Canceled
+                state is Error || state is Canceled
             }
             Finished -> {
                 state is Completed
-            }
-            else -> {
-                true
             }
         }
     }
@@ -193,6 +188,7 @@ sealed interface UiAction {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("UNUSED_VALUE")
 @Composable
 fun DownloadPageV2(
     modifier: Modifier = Modifier,
@@ -203,16 +199,13 @@ fun DownloadPageV2(
     val view = LocalView.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val uriHandler = LocalUriHandler.current
+    val shareTitle = stringResource(R.string.share)
 
     DownloadPageImplV2(
         modifier = modifier,
         taskDownloadStateMap = downloader.getTaskStateMap(),
-        downloadCallback = {
-            view.slightHapticFeedback()
-            dialogViewModel.postAction(Action.ShowSheet())
-        },
         onMenuOpen = onMenuOpen,
     ) { task, action ->
         view.slightHapticFeedback()
@@ -221,13 +214,19 @@ fun DownloadPageV2(
             UiAction.Delete -> downloader.remove(task)
             UiAction.Resume -> downloader.restart(task)
             is UiAction.CopyErrorReport -> {
-                clipboardManager.setText(
-                    AnnotatedString(getErrorReport(action.throwable, task.url))
-                )
+                scope.launch {
+                    clipboard.setClipEntry(
+                        ClipEntry(ClipData.newPlainText("error", getErrorReport(action.throwable, task.url)))
+                    )
+                }
                 context.makeToast(R.string.error_copied)
             }
             UiAction.CopyVideoURL -> {
-                clipboardManager.setText(AnnotatedString(task.url))
+                scope.launch {
+                    clipboard.setClipEntry(
+                        ClipEntry(ClipData.newPlainText("url", task.url))
+                    )
+                }
                 context.makeToast(R.string.link_copied)
             }
             is UiAction.OpenFile -> {
@@ -242,7 +241,6 @@ fun DownloadPageV2(
                 uriHandler.openUri(action.url)
             }
             is UiAction.ShareFile -> {
-                val shareTitle = context.getString(R.string.share)
                 FileUtil.createIntentForSharingFile(action.filePath)?.let {
                     context.startActivity(Intent.createChooser(it, shareTitle))
                 }
@@ -276,7 +274,7 @@ fun DownloadPageV2(
             sheetState = sheetState,
             config = Config(),
             preferences = preferences,
-            onPreferencesUpdate = { preferences = it },
+            onPreferencesUpdate = { },
             onActionPost = { dialogViewModel.postAction(it) },
         )
     }
@@ -317,7 +315,6 @@ private const val HeaderSpacingDp = 28
 fun DownloadPageImplV2(
     modifier: Modifier = Modifier,
     taskDownloadStateMap: SnapshotStateMap<Task, Task.State>,
-    downloadCallback: () -> Unit = {},
     onMenuOpen: (() -> Unit) = {},
     onActionPost: (Task, UiAction) -> Unit,
 ) {
@@ -351,7 +348,6 @@ fun DownloadPageImplV2(
     Scaffold(
         modifier = modifier.fillMaxSize().statusBarsPadding(),
         containerColor = MaterialTheme.colorScheme.surface,
-        floatingActionButton = { FABs(modifier = Modifier, downloadCallback = downloadCallback) },
     ) { windowInsetsPadding ->
         val lazyListState = rememberLazyGridState()
         val windowWidthSizeClass = LocalWindowWidthState.current
@@ -582,77 +578,53 @@ private fun HeaderExpanded(modifier: Modifier = Modifier) {
     Spacer(Modifier.height(4.dp))
 }
 
-@Composable
-fun FABs(modifier: Modifier = Modifier, downloadCallback: () -> Unit = {}) {
-    val expanded = LocalWindowWidthState.current != WindowWidthSizeClass.Compact
-    Column(modifier = modifier.padding(6.dp), horizontalAlignment = Alignment.End) {
-        FloatingActionButton(
-            onClick = downloadCallback,
-            content = {
-                if (expanded) {
-                    Row(
-                        modifier = Modifier.widthIn(min = 80.dp).padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(Icons.Outlined.FileDownload, contentDescription = null)
-                        Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.download))
-                    }
-                } else {
-                    Icon(
-                        Icons.Outlined.FileDownload,
-                        contentDescription = stringResource(R.string.download),
-                    )
-                }
-            },
-            modifier = Modifier.padding(vertical = 12.dp),
-        )
-    }
-}
 
+@Suppress("UiComposableLambdaError")
 @Composable
 @Preview
 private fun DownloadQueuePlaceholder(modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier = modifier) {
-        ConstraintLayout {
-            val (image, text) = createRefs()
-            val showImage =
-                with(LocalDensity.current) {
-                    this@BoxWithConstraints.constraints.maxHeight >= 240.dp.toPx()
-                }
-            if (showImage) {
-                Image(
-                    painter = rememberVectorPainter(image = DynamicColorImageVectors.download()),
-                    contentDescription = null,
-                    modifier =
-                        Modifier.fillMaxHeight(0.5f).widthIn(max = 240.dp).constrainAs(image) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                )
-            } else {
-                Spacer(Modifier.height(72.dp).constrainAs(image) { top.linkTo(parent.top) })
-            }
-            Column(
-                modifier = Modifier.constrainAs(text) { top.linkTo(image.bottom, margin = 36.dp) },
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(R.string.you_ll_find_your_downloads_here),
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = stringResource(R.string.download_hint),
-                    modifier = Modifier.padding(top = 4.dp).padding(horizontal = 24.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
+        val showImage = with(LocalDensity.current) { constraints.maxHeight >= 240.dp.toPx() }
+        DownloadQueuePlaceholderContent(showImage = showImage)
+    }
+}
+
+@Composable
+private fun DownloadQueuePlaceholderContent(showImage: Boolean) {
+    ConstraintLayout {
+        val (image, text) = createRefs()
+        if (showImage) {
+            Image(
+                painter = rememberVectorPainter(image = DynamicColorImageVectors.download()),
+                contentDescription = null,
+                modifier =
+                    Modifier.fillMaxHeight(0.5f).widthIn(max = 240.dp).constrainAs(image) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+            )
+        } else {
+            Spacer(Modifier.height(72.dp).constrainAs(image) { top.linkTo(parent.top) })
+        }
+        Column(
+            modifier = Modifier.constrainAs(text) { top.linkTo(image.bottom, margin = 36.dp) },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.you_ll_find_your_downloads_here),
+                modifier = Modifier.padding(horizontal = 24.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = stringResource(R.string.download_hint),
+                modifier = Modifier.padding(top = 4.dp).padding(horizontal = 24.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
@@ -725,6 +697,7 @@ fun SubHeader(
     }
 }
 
+@Suppress("unused")
 internal class DownloadPageV2Test {
     private val mockDownloader =
         object : DownloaderV2 {
@@ -803,10 +776,10 @@ internal class DownloadPageV2Test {
 
         val downloader: DownloaderV2 = mockDownloader
         KiteTheme {
-            Column() {
+            Column {
                 DownloadPageImplV2(
                     taskDownloadStateMap = downloader.getTaskStateMap(),
-                    onActionPost = { task, state -> },
+                    onActionPost = { _, _ -> },
                     onMenuOpen = {},
                 )
             }

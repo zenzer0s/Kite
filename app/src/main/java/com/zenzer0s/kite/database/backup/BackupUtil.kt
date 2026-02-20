@@ -7,9 +7,8 @@ import com.zenzer0s.kite.database.objects.CommandTemplate
 import com.zenzer0s.kite.database.objects.DownloadedVideoInfo
 import com.zenzer0s.kite.database.objects.OptionShortcut
 import com.zenzer0s.kite.util.DatabaseUtil
-import java.util.Date
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.util.Date
 
 object BackupUtil {
     private val format = Json {

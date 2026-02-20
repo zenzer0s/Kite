@@ -1,6 +1,16 @@
 package com.zenzer0s.kite.ui.page.settings.appearance
 
 import android.os.Build
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -38,9 +48,11 @@ fun DarkThemePreferences(onNavigateBack: () -> Unit) {
     val isHighContrastModeEnabled = darkThemePreference.isHighContrastModeEnabled
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(modifier = Modifier, text = stringResource(id = R.string.dark_theme))
                 },
                 navigationIcon = { BackButton { onNavigateBack() } },
@@ -48,39 +60,70 @@ fun DarkThemePreferences(onNavigateBack: () -> Unit) {
             )
         },
         content = {
-            LazyColumn(modifier = Modifier, contentPadding = it) {
-                if (Build.VERSION.SDK_INT >= 29)
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
+                
+                val supportsFollowSystem = Build.VERSION.SDK_INT >= 29
+                val themeModeTotalItems = if (supportsFollowSystem) 3 else 2
+                
+                if (supportsFollowSystem) {
                     item {
-                        PreferenceSingleChoiceItem(
-                            text = stringResource(R.string.follow_system),
-                            selected = darkThemePreference.darkThemeValue == FOLLOW_SYSTEM,
+                        KitePreferenceItem(
+                            modifier = Modifier.clip(GroupedListDefaults.getShape(0, themeModeTotalItems)),
+                            title = stringResource(R.string.follow_system),
+                            trailingContent = {
+                                androidx.compose.material3.RadioButton(
+                                    selected = darkThemePreference.darkThemeValue == FOLLOW_SYSTEM,
+                                    onClick = null
+                                )
+                            },
                         ) {
                             PreferenceUtil.modifyDarkThemePreference(FOLLOW_SYSTEM)
                         }
                     }
+                }
+                
                 item {
-                    PreferenceSingleChoiceItem(
-                        text = stringResource(R.string.on),
-                        selected = darkThemePreference.darkThemeValue == ON,
+                    val onIndex = if (supportsFollowSystem) 1 else 0
+                    KitePreferenceItem(
+                        modifier = Modifier.clip(GroupedListDefaults.getShape(onIndex, themeModeTotalItems)),
+                        title = stringResource(R.string.on),
+                        trailingContent = {
+                            androidx.compose.material3.RadioButton(
+                                selected = darkThemePreference.darkThemeValue == ON,
+                                onClick = null
+                            )
+                        },
                     ) {
                         PreferenceUtil.modifyDarkThemePreference(ON)
                     }
                 }
+                
                 item {
-                    PreferenceSingleChoiceItem(
-                        text = stringResource(R.string.off),
-                        selected = darkThemePreference.darkThemeValue == OFF,
+                    val offIndex = if (supportsFollowSystem) 2 else 1
+                    KitePreferenceItem(
+                        modifier = Modifier.clip(GroupedListDefaults.getShape(offIndex, themeModeTotalItems)),
+                        title = stringResource(R.string.off),
+                        trailingContent = {
+                            androidx.compose.material3.RadioButton(
+                                selected = darkThemePreference.darkThemeValue == OFF,
+                                onClick = null
+                            )
+                        },
                     ) {
                         PreferenceUtil.modifyDarkThemePreference(OFF)
                     }
                 }
+                
                 item { PreferenceSubtitle(text = stringResource(R.string.additional_settings)) }
+                
                 item {
-                    PreferenceSwitchVariant(
+                    KitePreferenceSwitchItem(
+                        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                         title = stringResource(R.string.high_contrast),
                         icon = Icons.Outlined.Contrast,
-                        isChecked = isHighContrastModeEnabled,
-                        onClick = {
+                        checked = isHighContrastModeEnabled,
+                        onCheckedChange = {
                             PreferenceUtil.modifyDarkThemePreference(
                                 isHighContrastModeEnabled = !isHighContrastModeEnabled
                             )

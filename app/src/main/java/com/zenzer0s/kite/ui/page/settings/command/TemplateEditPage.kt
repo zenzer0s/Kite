@@ -1,6 +1,7 @@
 package com.zenzer0s.kite.ui.page.settings.command
 
 import androidx.compose.foundation.horizontalScroll
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -123,7 +124,7 @@ fun TemplateEditPage(onDismissRequest: () -> Unit, templateId: Int) {
             )
         },
     ) { paddings ->
-        LazyColumn(modifier = Modifier.padding(paddings), contentPadding = PaddingValues()) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(paddings), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             item {
                 val description = stringResource(R.string.template_label)
 

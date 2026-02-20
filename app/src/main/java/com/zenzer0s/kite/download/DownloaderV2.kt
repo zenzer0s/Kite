@@ -115,9 +115,9 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
             enqueueFromBackup()
 
             snapshotFlow
-                .map { it.filter { it.value.downloadState !is Completed } }
+                .map { it -> it.filter { it.value.downloadState !is Completed } }
                 .distinctUntilChanged()
-                .collect {
+                .collect { it ->
                     it.forEach { Log.d(TAG, it.value.viewState.title) }
                     PreferenceUtil.encodeTaskListBackup(it)
                 }
@@ -129,9 +129,8 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
             PreferenceUtil.decodeTaskListBackup()
                 .filter { it.value.downloadState !is Completed }
                 .mapValues { (_, state) ->
-                    val preState = state.downloadState
                     val downloadState =
-                        when (preState) {
+                        when (val preState = state.downloadState) {
                             is FetchingInfo,
                             Idle -> {
                                 Canceled(action = FetchInfo)
@@ -389,15 +388,15 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                     val progress = if (preState is Running) preState.progress else null
                     NotificationUtil.cancelNotification(notificationId)
                     downloadState =
-                        DownloadState.Canceled(action = preState.action, progress = progress)
+                        Canceled(action = preState.action, progress = progress)
                 }
                 return res
             }
             Idle -> {
-                downloadState = DownloadState.Canceled(action = FetchInfo)
+                downloadState = Canceled(action = FetchInfo)
             }
             ReadyWithInfo -> {
-                downloadState = DownloadState.Canceled(action = Download)
+                downloadState = Canceled(action = Download)
             }
 
             else -> {

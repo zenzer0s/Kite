@@ -2,7 +2,6 @@ package com.zenzer0s.kite.download
 
 import com.zenzer0s.kite.database.objects.CommandTemplate
 import com.zenzer0s.kite.download.Task.TypeInfo
-import com.zenzer0s.kite.download.Task.ViewState
 import com.zenzer0s.kite.util.DownloadUtil
 import com.zenzer0s.kite.util.Format
 import com.zenzer0s.kite.util.VideoInfo

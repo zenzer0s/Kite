@@ -4,23 +4,19 @@ import android.webkit.CookieManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarExitDirection
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,11 +27,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.zenzer0s.kite.App
-import com.zenzer0s.kite.R
-import com.zenzer0s.kite.ui.common.HapticFeedback.slightHapticFeedback
-import com.zenzer0s.kite.ui.common.LocalWindowWidthState
 import com.zenzer0s.kite.ui.common.Route
+import com.zenzer0s.kite.ui.component.FloatingNavToolbar
 import com.zenzer0s.kite.ui.common.animatedComposable
 import com.zenzer0s.kite.ui.common.animatedComposableVariant
 import com.zenzer0s.kite.ui.common.arg
@@ -51,7 +44,6 @@ import com.zenzer0s.kite.ui.page.settings.about.CreditsPage
 import com.zenzer0s.kite.ui.page.settings.about.UpdatePage
 import com.zenzer0s.kite.ui.page.settings.appearance.AppearancePreferences
 import com.zenzer0s.kite.ui.page.settings.appearance.DarkThemePreferences
-import com.zenzer0s.kite.ui.page.settings.appearance.LanguagePage
 import com.zenzer0s.kite.ui.page.settings.command.TemplateEditPage
 import com.zenzer0s.kite.ui.page.settings.command.TemplateListPage
 import com.zenzer0s.kite.ui.page.settings.directory.DownloadDirectoryPreferences
@@ -66,28 +58,19 @@ import com.zenzer0s.kite.ui.page.settings.network.WebViewPage
 import com.zenzer0s.kite.ui.page.settings.telegram.TelegramPreferencesPage
 import com.zenzer0s.kite.ui.page.settings.troubleshooting.TroubleShootingPage
 import com.zenzer0s.kite.ui.page.videolist.VideoListPage
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-private const val TAG = "HomeEntry"
 
 private val TopDestinations =
-    listOf(Route.HOME, Route.TASK_LIST, Route.SETTINGS_PAGE, Route.DOWNLOADS)
+    listOf(Route.HOME, Route.SETTINGS_PAGE, Route.DOWNLOADS)
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
 
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val view = LocalView.current
-    val windowWidth = LocalWindowWidthState.current
     val sheetState by dialogViewModel.sheetStateFlow.collectAsStateWithLifecycle()
     val cookiesViewModel: CookiesViewModel = koinViewModel()
-
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val versionReport = App.packageInfo.versionName.toString()
-    val appName = stringResource(R.string.app_name)
-    val scope = rememberCoroutineScope()
 
     val onNavigateBack: () -> Unit = {
         with(navController) {
@@ -104,82 +87,74 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     }
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    var currentTopDestination by rememberSaveable { mutableStateOf(currentRoute) }
 
-    LaunchedEffect(currentRoute) {
-        if (currentRoute in TopDestinations) {
-            currentTopDestination = currentRoute
-        }
-    }
+    val showNavBar = currentRoute in TopDestinations
+    val scrollBehavior = key(currentRoute) { FloatingToolbarDefaults.exitAlwaysScrollBehavior(FloatingToolbarExitDirection.Bottom) }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        NavigationDrawer(
-            windowWidth = windowWidth,
-            drawerState = drawerState,
-            currentRoute = currentRoute,
-            currentTopDestination = currentTopDestination,
-            showQuickSettings = true,
-            gesturesEnabled = currentRoute == Route.HOME,
-            onDismissRequest = { drawerState.close() },
-            onNavigateToRoute = {
-                if (currentRoute != it) {
-                    navController.navigate(it) {
-                        launchSingleTop = true
-                        popUpTo(route = Route.HOME)
-                    }
-                }
-            },
-            footer = {
-                Text(
-                    appName + "\n" + versionReport + "\n" + currentRoute,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 12.dp),
-                )
-            },
+        NavHost(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (showNavBar) Modifier.nestedScroll(scrollBehavior) else Modifier),
+            navController = navController,
+            startDestination = Route.HOME,
         ) {
-            NavHost(
-                modifier = Modifier.align(Alignment.Center),
-                navController = navController,
-                startDestination = Route.HOME,
-            ) {
-                animatedComposable(Route.HOME) {
-                    DownloadPageV2(
-                        dialogViewModel = dialogViewModel,
-                        onMenuOpen = {
-                            view.slightHapticFeedback()
-                            scope.launch { drawerState.open() }
-                        },
-                    )
-                }
-                animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
-                animatedComposableVariant(Route.TASK_LIST) {
-                    TaskListPage(
-                        onNavigateBack = onNavigateBack,
-                        onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
-                    )
-                }
-                slideInVerticallyComposable(
-                    Route.TASK_LOG arg Route.TASK_HASHCODE,
-                    arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
-                ) {
-                    TaskLogPage(
-                        onNavigateBack = onNavigateBack,
-                        taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
-                    )
-                }
-
-                settingsGraph(
+            animatedComposable(Route.HOME) {
+                DownloadPageV2(
+                    dialogViewModel = dialogViewModel,
+                    onMenuOpen = {},
+                )
+            }
+            animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
+            animatedComposableVariant(Route.TASK_LIST) {
+                TaskListPage(
                     onNavigateBack = onNavigateBack,
-                    onNavigateTo = { route ->
-                        navController.navigate(route = route) { launchSingleTop = true }
-                    },
-                    cookiesViewModel = cookiesViewModel,
+                    onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
+                )
+            }
+            slideInVerticallyComposable(
+                Route.TASK_LOG arg Route.TASK_HASHCODE,
+                arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
+            ) {
+                TaskLogPage(
+                    onNavigateBack = onNavigateBack,
+                    taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
                 )
             }
 
-            AppUpdater()
-            YtdlpUpdater()
+            settingsGraph(
+                onNavigateBack = onNavigateBack,
+                onNavigateTo = { route ->
+                    navController.navigate(route = route) { launchSingleTop = true }
+                },
+                cookiesViewModel = cookiesViewModel,
+            )
+        }
+
+        AppUpdater()
+        YtdlpUpdater()
+
+        if (showNavBar) {
+            FloatingNavToolbar(
+                currentRoute = currentRoute,
+                scrollBehavior = scrollBehavior,
+                onNavigate = { route ->
+                    if (currentRoute != route) {
+                        navController.navigate(route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(route = Route.HOME) { saveState = true }
+                        }
+                    }
+                },
+                onDownload = if (currentRoute == Route.HOME) {
+                    { dialogViewModel.postAction(DownloadDialogViewModel.Action.ShowSheet()) }
+                } else null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 16.dp),
+            )
         }
     }
 }
@@ -190,9 +165,6 @@ fun NavGraphBuilder.settingsGraph(
     cookiesViewModel: CookiesViewModel,
 ) {
     navigation(startDestination = Route.SETTINGS_PAGE, route = Route.SETTINGS) {
-        animatedComposable(Route.DOWNLOAD_DIRECTORY) {
-            DownloadDirectoryPreferences(onNavigateBack)
-        }
         animatedComposable(Route.SETTINGS_PAGE) {
             SettingsPage(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo)
         }
@@ -220,7 +192,6 @@ fun NavGraphBuilder.settingsGraph(
             AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo)
         }
         animatedComposable(Route.INTERACTION) { InteractionPreferencePage(onBack = onNavigateBack) }
-        animatedComposable(Route.LANGUAGES) { LanguagePage { onNavigateBack() } }
         animatedComposable(Route.DOWNLOAD_DIRECTORY) {
             DownloadDirectoryPreferences { onNavigateBack() }
         }

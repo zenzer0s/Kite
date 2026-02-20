@@ -1,6 +1,7 @@
 package com.zenzer0s.kite.ui.page.settings.appearance
 
 import android.content.Intent
+import androidx.compose.ui.draw.clip
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -57,7 +58,7 @@ import com.zenzer0s.kite.util.toDisplayName
 import java.util.Locale
 
 @Composable
-fun LanguagePage(onNavigateBack: () -> Unit = {}) {
+fun LanguageBottomSheet(onDismissRequest: () -> Unit = {}) {
     val selectedLocale by remember { mutableStateOf(Locale.getDefault()) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -117,8 +118,8 @@ fun LanguagePage(onNavigateBack: () -> Unit = {}) {
         } else {
             false
         }
-    LanguagePageImpl(
-        onNavigateBack = onNavigateBack,
+    LanguageBottomSheetImpl(
+        onDismissRequest = onDismissRequest,
         suggestedLocales = suggestedLocales,
         otherLocales = otherLocales,
         isSystemLocaleSettingsAvailable = isSystemLocaleSettingsAvailable,
@@ -136,8 +137,8 @@ fun LanguagePage(onNavigateBack: () -> Unit = {}) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LanguagePageImpl(
-    onNavigateBack: () -> Unit = {},
+private fun LanguageBottomSheetImpl(
+    onDismissRequest: () -> Unit = {},
     suggestedLocales: Set<Locale>,
     otherLocales: Set<Locale>,
     isSystemLocaleSettingsAvailable: Boolean = false,
@@ -145,131 +146,110 @@ private fun LanguagePageImpl(
     selectedLocale: Locale,
     onLanguageSelected: (Locale?) -> Unit = {},
 ) {
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-            rememberTopAppBarState(),
-            canScroll = { true },
-        )
-    val uriHandler = LocalUriHandler.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    com.zenzer0s.kite.ui.component.SealModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        contentPadding = PaddingValues(0.dp),
+    ) {
+        com.zenzer0s.kite.ui.component.DrawerSheetSubtitle(text = stringResource(R.string.language), modifier = Modifier.padding(horizontal = 16.dp))
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(modifier = Modifier, text = stringResource(id = R.string.language))
-                },
-                navigationIcon = { BackButton { onNavigateBack() } },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        content = {
-            LazyColumn(modifier = Modifier, contentPadding = it) {
-                item {
-                    PreferencesHintCard(
-                        title = stringResource(R.string.translate),
-                        description = stringResource(R.string.translate_desc),
-                        icon = Icons.Outlined.Translate,
-                    ) {
-                        uriHandler.openUri(weblate)
-                    }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(com.zenzer0s.kite.ui.theme.GroupedListDefaults.VerticalSpacing)
+        ) {
+            item {
+                PreferencesHintCard(
+                    title = stringResource(R.string.translate),
+                    description = stringResource(R.string.translate_desc),
+                    icon = Icons.Outlined.Translate,
+                ) {
+                    uriHandler.openUri(com.zenzer0s.kite.ui.page.settings.about.weblate)
                 }
+            }
 
-                if (suggestedLocales.isNotEmpty()) {
-
-                    item { PreferenceSubtitle(text = stringResource(id = R.string.suggested)) }
-
-                    if (!suggestedLocales.contains(Locale.getDefault())) {
-                        item {
-                            PreferenceSingleChoiceItem(
-                                text = stringResource(id = R.string.follow_system),
-                                selected = !suggestedLocales.contains(selectedLocale),
-                            ) {
-                                onLanguageSelected(null)
-                            }
-                        }
-                    }
-
-                    for (locale in suggestedLocales) {
-                        item {
-                            PreferenceSingleChoiceItem(
-                                text = locale.toDisplayName(),
-                                selected = selectedLocale == locale,
-                            ) {
-                                onLanguageSelected(locale)
-                            }
-                        }
-                    }
-                }
-
-                item { PreferenceSubtitle(text = stringResource(id = R.string.all_languages)) }
-
-                for (locale in otherLocales) {
+            if (suggestedLocales.isNotEmpty()) {
+                item { PreferenceSubtitle(text = stringResource(id = R.string.suggested)) }
+                
+                val includeFollowSystem = !suggestedLocales.contains(Locale.getDefault())
+                val suggestedCount = suggestedLocales.size + (if (includeFollowSystem) 1 else 0)
+                
+                if (includeFollowSystem) {
                     item {
-                        PreferenceSingleChoiceItem(
-                            text = locale.toDisplayName(),
-                            selected = selectedLocale == locale,
+                        com.zenzer0s.kite.ui.component.KitePreferenceItem(
+                            modifier = Modifier.clip(com.zenzer0s.kite.ui.theme.GroupedListDefaults.getShape(0, suggestedCount)),
+                            title = stringResource(id = R.string.follow_system),
+                            trailingContent = {
+                                androidx.compose.material3.RadioButton(
+                                    selected = !suggestedLocales.contains(selectedLocale),
+                                    onClick = null
+                                )
+                            }
+                        ) {
+                            onLanguageSelected(null)
+                        }
+                    }
+                }
+
+                suggestedLocales.forEachIndexed { index, locale ->
+                    val actualIndex = index + if (includeFollowSystem) 1 else 0
+                    item {
+                        com.zenzer0s.kite.ui.component.KitePreferenceItem(
+                            modifier = Modifier.clip(com.zenzer0s.kite.ui.theme.GroupedListDefaults.getShape(actualIndex, suggestedCount)),
+                            title = locale.toDisplayName(),
+                            trailingContent = {
+                                androidx.compose.material3.RadioButton(
+                                    selected = selectedLocale == locale,
+                                    onClick = null
+                                )
+                            }
                         ) {
                             onLanguageSelected(locale)
                         }
                     }
                 }
+            }
 
+            if (otherLocales.isNotEmpty()) {
+                item { PreferenceSubtitle(text = stringResource(id = R.string.all_languages)) }
+                
+                val otherCount = otherLocales.size + if (isSystemLocaleSettingsAvailable) 1 else 0
+                
+                otherLocales.forEachIndexed { index, locale ->
+                    item {
+                        com.zenzer0s.kite.ui.component.KitePreferenceItem(
+                            modifier = Modifier.clip(com.zenzer0s.kite.ui.theme.GroupedListDefaults.getShape(index, otherCount)),
+                            title = locale.toDisplayName(),
+                            trailingContent = {
+                                androidx.compose.material3.RadioButton(
+                                    selected = selectedLocale == locale,
+                                    onClick = null
+                                )
+                            }
+                        ) {
+                            onLanguageSelected(locale)
+                        }
+                    }
+                }
+                
                 if (isSystemLocaleSettingsAvailable) {
                     item {
-                        androidx.compose.material3.HorizontalDivider()
-                        Surface(
-                            modifier =
-                                Modifier.clickable(onClick = onNavigateToSystemLocaleSettings)
-                        ) {
-                            Row(
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .padding(
-                                            PaddingValues(horizontal = 8.dp, vertical = 16.dp)
-                                        ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.system_settings),
-                                        maxLines = 1,
-                                        style =
-                                            MaterialTheme.typography.titleLarge.copy(
-                                                fontSize = 20.sp
-                                            ),
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
+                        com.zenzer0s.kite.ui.component.KitePreferenceItem(
+                            modifier = Modifier.clip(com.zenzer0s.kite.ui.theme.GroupedListDefaults.getShape(otherLocales.size, otherCount)),
+                            title = stringResource(R.string.system_settings),
+                            trailingContent = {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
                                     contentDescription = null,
-                                    modifier = Modifier.padding(end = 16.dp).size(18.dp),
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
+                        ) {
+                            onNavigateToSystemLocaleSettings()
                         }
                     }
                 }
             }
-        },
-    )
-}
-
-@Preview
-@Composable
-private fun LanguagePagePreview() {
-    var language by remember { mutableStateOf(Locale.JAPANESE) }
-    val map = setOf(Locale.forLanguageTag("en-US"))
-    KiteTheme {
-        LanguagePageImpl(
-            suggestedLocales = map,
-            otherLocales = map + Locale.forLanguageTag("ja-JP"),
-            isSystemLocaleSettingsAvailable = true,
-            onNavigateToSystemLocaleSettings = { /*TODO*/ },
-            selectedLocale = language,
-        ) {
-            language = it
         }
     }
 }

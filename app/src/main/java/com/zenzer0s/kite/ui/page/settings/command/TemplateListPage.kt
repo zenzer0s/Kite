@@ -1,6 +1,13 @@
 package com.zenzer0s.kite.ui.page.settings.command
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -14,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AssignmentReturn
@@ -126,10 +135,12 @@ fun TemplateListPage(onNavigateBack: () -> Unit, onNavigateToEditPage: (Int) -> 
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         snackbarHost = { SnackbarHost(modifier = Modifier, hostState = snackbarHostState) },
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(
                         modifier = Modifier,
                         text =
@@ -303,20 +314,25 @@ fun TemplateListPage(onNavigateBack: () -> Unit, onNavigateToEditPage: (Int) -> 
             }
         },
     ) {
-        LazyColumn(modifier = Modifier, contentPadding = it) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
+            val totalItems = 1 + templates.size + if (!isMultiSelectEnabled) 2 else 0
+            
             item {
-                PreferenceSwitchWithContainer(
+                KitePreferenceSwitchItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(0, totalItems)),
                     title = stringResource(R.string.use_custom_command),
-                    icon = null,
-                    isChecked = isCustomCommandEnabled,
-                    onClick = {
+                    icon = Icons.Outlined.Terminal,
+                    checked = isCustomCommandEnabled,
+                    onCheckedChange = {
                         isCustomCommandEnabled = !isCustomCommandEnabled
                         PreferenceUtil.updateValue(CUSTOM_COMMAND, isCustomCommandEnabled)
                     },
                 )
             }
-            items(templates) { commandTemplate ->
+            itemsIndexed(templates) { index, commandTemplate ->
                 TemplateItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(index + 1, totalItems)),
                     label = commandTemplate.name,
                     template = commandTemplate.template,
                     selected = selectedTemplateId == commandTemplate.id,
@@ -341,7 +357,8 @@ fun TemplateListPage(onNavigateBack: () -> Unit, onNavigateToEditPage: (Int) -> 
             }
             if (!isMultiSelectEnabled) {
                 item {
-                    PreferenceItemVariant(
+                    KitePreferenceItem(
+                        modifier = Modifier.clip(GroupedListDefaults.getShape(totalItems - 2, totalItems)),
                         title = stringResource(id = R.string.new_template),
                         icon = Icons.Outlined.Add,
                     ) {
@@ -349,7 +366,8 @@ fun TemplateListPage(onNavigateBack: () -> Unit, onNavigateToEditPage: (Int) -> 
                     }
                 }
                 item {
-                    PreferenceItemVariant(
+                    KitePreferenceItem(
+                        modifier = Modifier.clip(GroupedListDefaults.getShape(totalItems - 1, totalItems)),
                         title = stringResource(id = R.string.edit_shortcuts),
                         icon = Icons.Outlined.BookmarkAdd,
                     ) {

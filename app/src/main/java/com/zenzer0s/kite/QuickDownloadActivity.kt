@@ -41,8 +41,6 @@ import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.core.context.GlobalContext
 
-private const val TAG = "QuickDownloadActivity"
-
 class QuickDownloadActivity : ComponentActivity() {
     private var sharedUrlCached: String = ""
 
@@ -154,7 +152,7 @@ class QuickDownloadActivity : ComponentActivity() {
                             sheetState = sheetState,
                             config = Config(),
                             preferences = preferences,
-                            onPreferencesUpdate = { preferences = it },
+                            onPreferencesUpdate = { },
                             onActionPost = { viewModel.postAction(it) },
                         )
                     }

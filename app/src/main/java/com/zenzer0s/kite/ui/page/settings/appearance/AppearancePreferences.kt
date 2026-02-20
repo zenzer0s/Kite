@@ -1,6 +1,10 @@
 package com.zenzer0s.kite.ui.page.settings.appearance
 
 import androidx.compose.animation.core.animateDpAsState
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -106,9 +111,11 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = {
+                colors = KiteCustomColors.topBarColors,
+title = {
                     Text(modifier = Modifier, text = stringResource(id = R.string.look_and_feel))
                 },
                 navigationIcon = { BackButton(onNavigateBack) },
@@ -116,7 +123,14 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
             )
         },
         content = {
-            Column(Modifier.verticalScroll(rememberScrollState()).padding(it)) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(it)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)
+            ) {
                 val downloadState = Task.DownloadState.Running(Job(), "", 0.8f)
                 VideoCardV2(
                     modifier = Modifier.padding(18.dp).clearAndSetSemantics {},
@@ -195,31 +209,39 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
                     indicatorWidth = 6.dp,
                 )
                 if (DynamicColors.isDynamicColorAvailable()) {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 3)),
                         title = stringResource(id = R.string.dynamic_color),
                         description = stringResource(id = R.string.dynamic_color_desc),
                         icon = Icons.Outlined.Colorize,
-                        isChecked = LocalDynamicColorSwitch.current,
-                        onClick = { PreferenceUtil.switchDynamicColor() },
+                        checked = LocalDynamicColorSwitch.current,
+                        onCheckedChange = { _ -> PreferenceUtil.switchDynamicColor() },
                     )
                 }
                 val isDarkTheme = LocalDarkTheme.current.isDarkTheme()
-                PreferenceSwitchWithDivider(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 3)),
                     title = stringResource(id = R.string.dark_theme),
                     icon = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                    isChecked = isDarkTheme,
+                    checked = isDarkTheme,
                     description = LocalDarkTheme.current.getDarkThemeDesc(),
-                    onChecked = {
+                    onCheckedChange = {
                         PreferenceUtil.modifyDarkThemePreference(if (isDarkTheme) OFF else ON)
                     },
                     onClick = { onNavigateTo(Route.DARK_THEME) },
                 )
-                PreferenceItem(
+                var showLanguageMenu by remember { mutableStateOf(false) }
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(2, 3)),
                     title = stringResource(R.string.language),
                     icon = Icons.Outlined.Language,
                     description = LocalConfiguration.current.locales[0].toDisplayName(),
                 ) {
-                    onNavigateTo(Route.LANGUAGES)
+                    showLanguageMenu = true
+                }
+                
+                if (showLanguageMenu) {
+                    LanguageBottomSheet { showLanguageMenu = false }
                 }
             }
         },

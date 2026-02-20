@@ -100,11 +100,17 @@ class App : Application() {
             }
         }
 
-        videoDownloadDir = VIDEO_DIRECTORY.getString(getExternalDownloadDirectory().absolutePath)
+        videoDownloadDir = VIDEO_DIRECTORY.getString(getExternalDownloadDirectory().absolutePath).replace("/Seal", "/Kite")
+        VIDEO_DIRECTORY.updateString(videoDownloadDir)
 
-        audioDownloadDir = AUDIO_DIRECTORY.getString(File(videoDownloadDir, "Audio").absolutePath)
+        audioDownloadDir = AUDIO_DIRECTORY.getString(File(videoDownloadDir, "Audio").absolutePath).replace("/Seal", "/Kite")
+        AUDIO_DIRECTORY.updateString(audioDownloadDir)
+
         if (!PreferenceUtil.containsKey(COMMAND_DIRECTORY)) {
             COMMAND_DIRECTORY.updateString(videoDownloadDir)
+        } else {
+            val cmdDir = COMMAND_DIRECTORY.getString().replace("/Seal", "/Kite")
+            COMMAND_DIRECTORY.updateString(cmdDir)
         }
         if (Build.VERSION.SDK_INT >= 26) NotificationUtil.createNotificationChannel()
 
@@ -136,7 +142,6 @@ class App : Application() {
         private val connection =
             object : ServiceConnection {
                 override fun onServiceConnected(className: ComponentName, service: IBinder) {
-                    val binder = service as DownloadService.DownloadServiceBinder
                     isServiceRunning = true
                 }
 
@@ -146,7 +151,7 @@ class App : Application() {
         fun startService() {
             if (isServiceRunning) return
             Intent(context.applicationContext, DownloadService::class.java).also { intent ->
-                context.applicationContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+                context.applicationContext.bindService(intent, connection, BIND_AUTO_CREATE)
             }
         }
 
@@ -182,7 +187,7 @@ class App : Application() {
                 }
 
                 Directory.CUSTOM_COMMAND -> {
-                    val path = FileUtil.getRealPath(uri)
+                    FileUtil.getRealPath(uri)
                 }
 
                 Directory.SDCARD -> {
@@ -198,7 +203,7 @@ class App : Application() {
 
         fun getVersionReport(): String {
             val versionName = packageInfo.versionName
-            val page = packageInfo
+            packageInfo
             val versionCode =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     packageInfo.longVersionCode
@@ -219,7 +224,7 @@ class App : Application() {
                 .toString()
         }
 
-        fun isFDroidBuild(): Boolean = BuildConfig.FLAVOR == "fdroid"
+        fun isFDroidBuild(): Boolean = false
 
         fun isDebugBuild(): Boolean = BuildConfig.DEBUG
 

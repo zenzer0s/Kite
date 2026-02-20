@@ -1,6 +1,17 @@
 package com.zenzer0s.kite.ui.page.settings.interaction
 
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -37,21 +48,25 @@ fun InteractionPreferencePage(modifier: Modifier = Modifier, onBack: () -> Unit)
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(text = stringResource(id = R.string.interface_and_interaction)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(text = stringResource(id = R.string.interface_and_interaction)) },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = { BackButton(onClick = onBack) },
             )
         },
     ) {
-        LazyColumn(modifier = Modifier, contentPadding = it) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             item {
                 PreferenceSubtitle(text = stringResource(id = R.string.settings_before_download))
             }
 
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(id = R.string.download_type),
                     description =
                         when (initialType) {

@@ -1,6 +1,14 @@
 package com.zenzer0s.kite.ui.page.settings.about
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
@@ -99,17 +107,20 @@ fun AboutPage(
     }
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = {
-            LazyColumn(modifier = Modifier.padding(it)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 8)),
                         title = stringResource(R.string.readme),
                         description = stringResource(R.string.readme_desc),
                         icon = Icons.Outlined.Description,
@@ -118,7 +129,8 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 8)),
                         title = stringResource(R.string.release),
                         description = stringResource(R.string.release_desc),
                         icon = Icons.Outlined.NewReleases,
@@ -127,14 +139,16 @@ fun AboutPage(
                     }
                 }
                 /*            item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 8)),
                         title = stringResource(R.string.github_issue),
                         description = stringResource(R.string.github_issue_desc),
                         icon = Icons.Outlined.ContactSupport,
                     ) { openUrl(githubIssueUrl) }
                 }*/
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 8)),
                         title = stringResource(R.string.telegram_channel),
                         description = telegramChannelUrl,
                         icon = painterResource(id = R.drawable.icons8_telegram_app),
@@ -143,7 +157,8 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 8)),
                         title = stringResource(R.string.matrix_space),
                         description = matrixSpaceUrl,
                         icon = painterResource(id = R.drawable.icons8_matrix),
@@ -152,7 +167,8 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(5, 8)),
                         title = stringResource(id = R.string.credits),
                         description = stringResource(id = R.string.credits_desc),
                         icon = Icons.Outlined.AutoAwesome,
@@ -161,23 +177,25 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(6, 8)),
                         title = stringResource(R.string.auto_update),
                         description = stringResource(R.string.check_for_updates_desc),
                         icon =
                             if (isAutoUpdateEnabled) Icons.Outlined.Update
                             else Icons.Outlined.UpdateDisabled,
-                        isChecked = isAutoUpdateEnabled,
-                        isSwitchEnabled = !App.isFDroidBuild(),
+                        checked = isAutoUpdateEnabled,
+                        enabled = !App.isFDroidBuild(),
                         onClick = onNavigateToUpdatePage,
-                        onChecked = {
+                        onCheckedChange = {
                             isAutoUpdateEnabled = !isAutoUpdateEnabled
                             PreferenceUtil.updateValue(AUTO_UPDATE, isAutoUpdateEnabled)
                         },
                     )
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(7, 8)),
                         title = stringResource(R.string.version),
                         description = versionName,
                         icon = Icons.Outlined.Info,
@@ -187,7 +205,8 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceItem(title = "Package name", description = context.packageName) {
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),title = "Package name", description = context.packageName) {
                         clipboardManager.setText(AnnotatedString(context.packageName))
                         ToastUtil.makeToast(R.string.info_copied)
                     }

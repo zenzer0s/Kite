@@ -1,6 +1,7 @@
 package com.zenzer0s.kite.ui.page.settings
 
 import androidx.compose.foundation.layout.PaddingValues
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -28,7 +29,7 @@ fun BasePreferencePage(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    containerColor: Color = MaterialTheme.colorScheme.background,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (paddingValues: PaddingValues) -> Unit,
@@ -38,6 +39,7 @@ fun BasePreferencePage(
         topBar
             ?: {
                 LargeTopAppBar(
+                    colors = KiteCustomColors.topBarColors,
                     title = { Text(text = title) },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = { BackButton(onClick = onBack) },

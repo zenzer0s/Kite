@@ -1,6 +1,13 @@
 package com.zenzer0s.kite.ui.page.settings
 
 import android.annotation.SuppressLint
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -53,7 +60,6 @@ import com.zenzer0s.kite.ui.common.Route
 import com.zenzer0s.kite.ui.common.intState
 import com.zenzer0s.kite.ui.component.BackButton
 import com.zenzer0s.kite.ui.component.PreferencesHintCard
-import com.zenzer0s.kite.ui.component.SettingItem
 import com.zenzer0s.kite.util.EXTRACT_AUDIO
 import com.zenzer0s.kite.util.PreferenceUtil.getBoolean
 
@@ -106,12 +112,14 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             val overrideTypography =
                 remember(typography) { typography.copy(headlineMedium = typography.displaySmall) }
 
             MaterialTheme(typography = overrideTypography) {
                 LargeTopAppBar(
+                    colors = KiteCustomColors.topBarColors,
                     title = { Text(text = stringResource(id = R.string.settings)) },
                     navigationIcon = { BackButton(onNavigateBack) },
                     scrollBehavior = scrollBehavior,
@@ -120,7 +128,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
             }
         },
     ) {
-        LazyColumn(modifier = Modifier, contentPadding = it) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 item {
                     AnimatedVisibility(
@@ -140,7 +148,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(0, 10)),
                     title = stringResource(id = R.string.general_settings),
                     description = stringResource(id = R.string.general_settings_desc),
                     icon = Icons.Rounded.SettingsApplications,
@@ -149,7 +158,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(1, 10)),
                     title = stringResource(id = R.string.download_directory),
                     description = stringResource(id = R.string.download_directory_desc),
                     icon = Icons.Rounded.Folder,
@@ -158,7 +168,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(2, 10)),
                     title = stringResource(id = R.string.format),
                     description = stringResource(id = R.string.format_settings_desc),
                     icon =
@@ -169,7 +180,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(3, 10)),
                     title = stringResource(id = R.string.network),
                     description = stringResource(id = R.string.network_settings_desc),
                     icon =
@@ -181,7 +193,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(4, 10)),
                     title = stringResource(id = R.string.custom_command),
                     description = stringResource(id = R.string.custom_command_desc),
                     icon = Icons.Rounded.Terminal,
@@ -190,7 +203,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(5, 10)),
                     title = stringResource(id = R.string.look_and_feel),
                     description = stringResource(id = R.string.display_settings),
                     icon = Icons.Rounded.Palette,
@@ -199,7 +213,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(6, 10)),
                     title = stringResource(id = R.string.interface_and_interaction),
                     description = stringResource(id = R.string.settings_before_download),
                     icon = Icons.Rounded.ViewComfy,
@@ -208,7 +223,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(7, 10)),
                     title = stringResource(R.string.fast_mode_telegram),
                     description = stringResource(R.string.fast_mode_telegram_settings_desc),
                     icon = Icons.Rounded.Cloud,
@@ -217,7 +233,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(8, 10)),
                     title = stringResource(R.string.trouble_shooting),
                     description = stringResource(R.string.trouble_shooting_desc),
                     icon = Icons.Rounded.BugReport,
@@ -226,7 +243,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
             item {
-                SettingItem(
+                KitePreferenceItem(
+                    modifier = Modifier.clip(GroupedListDefaults.getShape(9, 10)),
                     title = stringResource(id = R.string.about),
                     description = stringResource(id = R.string.about_page),
                     icon = Icons.Rounded.Info,

@@ -1,6 +1,13 @@
 package com.zenzer0s.kite.ui.page.settings.network
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import android.webkit.CookieManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -157,9 +164,11 @@ fun CookieProfilePage(
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(modifier = Modifier, text = stringResource(id = R.string.cookies)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(modifier = Modifier, text = stringResource(id = R.string.cookies)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 actions = {
                     var expanded by remember { mutableStateOf(false) }
@@ -224,7 +233,7 @@ fun CookieProfilePage(
             )
         },
     ) { paddingValues ->
-        LazyColumn(modifier = Modifier, contentPadding = paddingValues) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             item {
                 PreferenceSwitchWithContainer(
                     title = stringResource(R.string.use_cookies),

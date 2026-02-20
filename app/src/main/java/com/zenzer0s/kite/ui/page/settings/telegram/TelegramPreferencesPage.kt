@@ -1,6 +1,13 @@
 package com.zenzer0s.kite.ui.page.settings.telegram
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,16 +87,18 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(stringResource(R.string.fast_mode_telegram)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(stringResource(R.string.fast_mode_telegram)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { contentPadding ->
-        LazyColumn(contentPadding = contentPadding) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(contentPadding), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
             item {
                 PreferenceInfo(
                     text = stringResource(R.string.fast_mode_telegram_desc)
@@ -99,12 +108,13 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
             item { PreferenceSubtitle(text = stringResource(R.string.fast_mode)) }
 
             item {
-                PreferenceSwitch(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 1)),
                     title = stringResource(R.string.fast_mode),
                     description = stringResource(R.string.fast_mode_desc),
                     icon = Icons.Outlined.Send,
-                    isChecked = fastMode,
-                    onClick = {
+                    checked = fastMode,
+                    onCheckedChange = { _ ->
                         fastMode = !fastMode
                         FAST_MODE.updateBoolean(fastMode)
                     },
@@ -114,13 +124,14 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
             item { PreferenceSubtitle(text = stringResource(R.string.telegram_cloud)) }
 
             item {
-                PreferenceSwitch(
+                KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 4)),
                     title = stringResource(R.string.telegram_upload),
                     description = stringResource(R.string.telegram_upload_desc),
                     icon = Icons.Outlined.Cloud,
-                    isChecked = telegramUpload,
+                    checked = telegramUpload,
                     enabled = fullyConfigured,
-                    onClick = {
+                    onCheckedChange = { _ ->
                         telegramUpload = !telegramUpload
                         TELEGRAM_UPLOAD.updateBoolean(telegramUpload)
                     },
@@ -128,7 +139,8 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
             }
 
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 4)),
                     title = stringResource(R.string.telegram_bot_token),
                     description =
                         if (tokenConfigured) maskToken(savedToken)
@@ -139,7 +151,8 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
             }
 
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 4)),
                     title = stringResource(R.string.telegram_chat_id),
                     description =
                         if (chatConfigured) savedChatId
@@ -150,7 +163,8 @@ fun TelegramPreferencesPage(onNavigateBack: () -> Unit) {
             }
 
             item {
-                PreferenceItem(
+                KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 4)),
                     title = stringResource(R.string.telegram_test_connection),
                     description = stringResource(R.string.telegram_test_connection_desc),
                     icon = Icons.Outlined.Bolt,

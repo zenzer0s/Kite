@@ -28,8 +28,11 @@ import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -731,6 +734,7 @@ fun CreditItem(
 @Composable
 @Preview
 fun TemplateItem(
+    modifier: Modifier = Modifier,
     label: String = "",
     template: String? = null,
     selected: Boolean = false,
@@ -741,62 +745,61 @@ fun TemplateItem(
     onCheckedChange: (Boolean) -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    Surface(
-        modifier =
-            Modifier.run {
-                if (!isMultiSelectEnabled)
-                    then(
-                        this.combinedClickable(
-                            onClick = onClick,
-                            onClickLabel = stringResource(R.string.edit),
-                            onLongClick = onLongClick,
-                            onLongClickLabel = stringResource(R.string.multiselect_mode),
-                        )
+    val colors = if (selected) {
+        com.zenzer0s.kite.ui.theme.KiteCustomColors.selectedListItemColors
+    } else {
+        com.zenzer0s.kite.ui.theme.GroupedListDefaults.listColors()
+    }
+
+    ListItem(
+        modifier = modifier.run {
+            if (!isMultiSelectEnabled)
+                then(
+                    this.combinedClickable(
+                        onClick = onClick,
+                        onClickLabel = stringResource(R.string.edit),
+                        onLongClick = onLongClick,
+                        onLongClickLabel = stringResource(R.string.multiselect_mode),
                     )
-                else {
-                    then(this.toggleable(value = checked, onValueChange = onCheckedChange))
-                }
+                )
+            else {
+                then(this.toggleable(value = checked, onValueChange = onCheckedChange))
             }
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AnimatedVisibility(visible = isMultiSelectEnabled) {
+        },
+        colors = colors,
+        headlineContent = {
+            Text(
+                text = label,
+                maxLines = 1,
+                style = MaterialTheme.typography.titleMedium,
+            )
+        },
+        supportingContent = template?.let {
+            {
+                Text(
+                    text = it,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        },
+        leadingContent = if (isMultiSelectEnabled) {
+            {
                 Checkbox(
                     modifier = Modifier.clearAndSetSemantics {},
                     checked = checked,
                     onCheckedChange = onCheckedChange,
                 )
             }
-
-            Column(modifier = Modifier.weight(1f).padding(horizontal = 10.dp)) {
-                with(MaterialTheme) {
-                    Text(
-                        text = label,
-                        maxLines = 1,
-                        style = typography.titleMedium,
-                        color = colorScheme.onSurface,
-                    )
-                    template?.let {
-                        Text(
-                            text = it,
-                            color = colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = typography.bodyMedium,
-                        )
-                    }
-                }
-            }
-
-            AnimatedVisibility(!isMultiSelectEnabled) {
-                Row {
+        } else null,
+        trailingContent = if (!isMultiSelectEnabled) {
+            {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     VerticalDivider(
-                        modifier =
-                            Modifier.height(32.dp)
-                                .padding(horizontal = 12.dp)
-                                .align(Alignment.CenterVertically),
+                        modifier = Modifier
+                            .height(32.dp)
+                            .padding(end = 6.dp),
                         color = MaterialTheme.colorScheme.outlineVariant,
                         thickness = 1.dp,
                     )
@@ -807,8 +810,8 @@ fun TemplateItem(
                     )
                 }
             }
-        }
-    }
+        } else null
+    )
 }
 
 @Composable
@@ -852,4 +855,59 @@ fun PreferenceInfo(
 @Preview(showBackground = true)
 fun PreferenceInfoPreview() {
     PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
+}
+
+@Composable
+fun PreferenceSegmentedItem(
+    title: String,
+    description: String? = null,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+    options: List<String>,
+    selectedIndex: Int,
+    onOptionSelected: (Int) -> Unit,
+) {
+    ListItem(
+        headlineContent = {
+            PreferenceItemTitle(
+                text = title,
+                enabled = enabled,
+            )
+        },
+        supportingContent = {
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                if (!description.isNullOrEmpty())
+                    PreferenceItemDescription(text = description, enabled = enabled)
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    options.forEachIndexed { index, label ->
+                        SingleChoiceSegmentedButton(
+                            selected = selectedIndex == index,
+                            onClick = { onOptionSelected(index) },
+                            shape =
+                                SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = options.size,
+                                ),
+                            enabled = enabled,
+                        ) {
+                            Text(text = label)
+                        }
+                    }
+                }
+            }
+        },
+        leadingContent =
+            if (icon != null) {
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.applyOpacity(enabled),
+                    )
+                }
+            } else null,
+    )
 }

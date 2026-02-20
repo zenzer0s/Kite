@@ -1,15 +1,18 @@
 package com.zenzer0s.kite.ui.page.settings.format
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.outlined.ArtTrack
 import androidx.compose.material.icons.outlined.ContentCut
 import androidx.compose.material.icons.outlined.Crop
 import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.MusicNote
-import androidx.compose.material.icons.outlined.Sort
 import androidx.compose.material.icons.outlined.SpatialAudioOff
 import androidx.compose.material.icons.outlined.Subtitles
 import androidx.compose.material.icons.outlined.Sync
@@ -19,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -29,20 +33,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.zenzer0s.kite.R
 import com.zenzer0s.kite.ui.common.booleanState
 import com.zenzer0s.kite.ui.common.intState
 import com.zenzer0s.kite.ui.component.BackButton
 import com.zenzer0s.kite.ui.component.ConfirmButton
 import com.zenzer0s.kite.ui.component.DismissButton
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
 import com.zenzer0s.kite.ui.component.PreferenceInfo
-import com.zenzer0s.kite.ui.component.PreferenceItem
 import com.zenzer0s.kite.ui.component.PreferenceSubtitle
-import com.zenzer0s.kite.ui.component.PreferenceSwitch
-import com.zenzer0s.kite.ui.component.PreferenceSwitchWithDivider
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
 import com.zenzer0s.kite.util.AUDIO_CONVERSION_FORMAT
 import com.zenzer0s.kite.util.AUDIO_CONVERT
 import com.zenzer0s.kite.util.CROP_ARTWORK
@@ -111,16 +118,19 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(modifier = Modifier, text = stringResource(id = R.string.format)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(modifier = Modifier, text = stringResource(id = R.string.format)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = {
             val isCustomCommandEnabled by remember { mutableStateOf(CUSTOM_COMMAND.getBoolean()) }
-            LazyColumn(contentPadding = it) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 if (isCustomCommandEnabled)
                     item {
                         PreferenceInfo(
@@ -129,20 +139,22 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     }
                 item { PreferenceSubtitle(text = stringResource(id = R.string.audio)) }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 4)),
                         title = stringResource(id = R.string.extract_audio),
                         description = stringResource(id = R.string.extract_audio_summary),
                         icon = Icons.Outlined.MusicNote,
-                        isChecked = audioSwitch,
+                        checked = audioSwitch,
                         enabled = !isCustomCommandEnabled,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             audioSwitch = !audioSwitch
                             PreferenceUtil.updateValue(EXTRACT_AUDIO, audioSwitch)
                         },
                     )
                 }
                 //                item {
-                //                    PreferenceItem(title = stringResource(id =
+                //                    KitePreferenceItem(
+                //                        title = stringResource(id =
                 // R.string.audio_format_preference),
                 //                        description = audioFormat,
                 //                        icon = Icons.Outlined.AudioFile,
@@ -151,7 +163,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 //                        onClick = { showAudioFormatDialog = true })
                 //                }
                 //                item {
-                //                    PreferenceItem(
+                //                    KitePreferenceItem(
                 //                        title = stringResource(id = R.string.audio_quality),
                 //                        description = audioQuality,
                 //                        icon = Icons.Outlined.HighQuality,
@@ -161,39 +173,42 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 //                    )
                 //                }
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 4)),
                         title = stringResource(R.string.convert_audio_format),
                         description = PreferenceStrings.getAudioConvertDesc(convertFormat),
                         icon = Icons.Outlined.Sync,
                         enabled = audioSwitch && !isCustomCommandEnabled,
                         onClick = { showAudioConvertDialog = true },
-                        isChecked = convertAudio,
-                        onChecked = {
+                        checked = convertAudio,
+                        onCheckedChange = {
                             convertAudio = !convertAudio
                             AUDIO_CONVERT.updateBoolean(convertAudio)
                         },
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 4)),
                         title = stringResource(id = R.string.embed_metadata),
                         description = stringResource(id = R.string.embed_metadata_desc),
                         enabled = audioSwitch && !isCustomCommandEnabled,
-                        isChecked = embedMetadata,
+                        checked = embedMetadata,
                         icon = Icons.Outlined.ArtTrack,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             embedMetadata = !embedMetadata
                             EMBED_METADATA.updateBoolean(embedMetadata)
                         },
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 4)),
                         title = stringResource(R.string.crop_artwork),
                         description = stringResource(R.string.crop_artwork_desc),
                         icon = Icons.Outlined.Crop,
                         enabled = embedMetadata && audioSwitch && !isCustomCommandEnabled,
-                        isChecked = isArtworkCroppingEnabled,
+                        checked = isArtworkCroppingEnabled,
                     ) {
                         isArtworkCroppingEnabled = !isArtworkCroppingEnabled
                         PreferenceUtil.updateValue(CROP_ARTWORK, isArtworkCroppingEnabled)
@@ -201,7 +216,8 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 }
                 item { PreferenceSubtitle(text = stringResource(id = R.string.video)) }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 4)),
                         title = stringResource(R.string.video_format_preference),
                         description = PreferenceStrings.getVideoFormatLabel(videoFormat),
                         icon = Icons.Outlined.VideoFile,
@@ -211,7 +227,8 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 4)),
                         title = stringResource(id = R.string.video_quality),
                         description = PreferenceStrings.getVideoResolutionDesc(videoQuality),
                         icon = Icons.Outlined.HighQuality,
@@ -222,11 +239,12 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 } /*                item {
                       var embedThumbnail by EMBED_THUMBNAIL.booleanState
 
-                      PreferenceSwitch(
+                      KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 4)),
                           title = stringResource(id = R.string.embed_thumbnail),
                           description = stringResource(id = R.string.embed_thumbnail_desc),
                           icon = Icons.Outlined.Photo,
-                          isChecked = embedThumbnail,
+                          checked = embedThumbnail,
                           enabled = !isCustomCommandEnabled && !audioSwitch
                       ) {
                           embedThumbnail = !embedThumbnail
@@ -235,16 +253,17 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                   }*/
 
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 4)),
                         title = stringResource(id = R.string.remux_container_mkv),
                         description = stringResource(id = R.string.remux_container_mkv_desc),
-                        isChecked = (downloadSubtitle && embedSubtitle) || remuxToMkv,
+                        checked = (downloadSubtitle && embedSubtitle) || remuxToMkv,
                         icon = Icons.Outlined.Movie,
                         enabled =
                             !(downloadSubtitle && embedSubtitle) &&
                                 !isCustomCommandEnabled &&
                                 !audioSwitch,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             remuxToMkv = !remuxToMkv
                             MERGE_OUTPUT_MKV.updateBoolean(remuxToMkv)
                         },
@@ -258,7 +277,8 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
 
                 item { PreferenceSubtitle(text = stringResource(id = R.string.advanced_settings)) }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 5)),
                         title = stringResource(id = R.string.subtitle),
                         icon = Icons.Outlined.Subtitles,
                         enabled = !isCustomCommandEnabled,
@@ -268,13 +288,14 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     }
                 }
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 5)),
                         title = stringResource(id = R.string.format_sorting),
-                        icon = Icons.Outlined.Sort,
+                        icon = Icons.AutoMirrored.Outlined.Sort,
                         description = stringResource(id = R.string.format_sorting_desc),
                         enabled = !isCustomCommandEnabled,
-                        isChecked = isFormatSortingEnabled,
-                        onChecked = {
+                        checked = isFormatSortingEnabled,
+                        onCheckedChange = {
                             isFormatSortingEnabled = !isFormatSortingEnabled
                             FORMAT_SORTING.updateBoolean(isFormatSortingEnabled)
                         },
@@ -282,23 +303,25 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     )
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 5)),
                         title = stringResource(id = R.string.format_selection),
                         icon = Icons.Outlined.VideoSettings,
                         enabled = !isCustomCommandEnabled,
                         description = stringResource(id = R.string.format_selection_desc),
-                        isChecked = isFormatSelectionEnabled,
+                        checked = isFormatSelectionEnabled,
                     ) {
                         isFormatSelectionEnabled = !isFormatSelectionEnabled
                         PreferenceUtil.updateValue(FORMAT_SELECTION, isFormatSelectionEnabled)
                     }
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 5)),
                         title = stringResource(id = R.string.clip_video),
                         description = stringResource(id = R.string.clip_video_desc),
                         icon = Icons.Outlined.ContentCut,
-                        isChecked = isVideoClipEnabled,
+                        checked = isVideoClipEnabled,
                         enabled = !isCustomCommandEnabled && isFormatSelectionEnabled,
                     ) {
                         if (!isVideoClipEnabled) showVideoClipDialog = true
@@ -309,12 +332,13 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     }
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 5)),
                         title = stringResource(id = R.string.merge_audiostream),
                         description = stringResource(id = R.string.merge_audiostream_desc),
-                        isChecked = mergeAudioStream,
+                        checked = mergeAudioStream,
                         icon = Icons.Outlined.SpatialAudioOff,
-                        onClick = {
+                        onCheckedChange = { _ ->
                             if (mergeAudioStream) {
                                 mergeAudioStream = false
                                 MERGE_MULTI_AUDIO_STREAM.updateBoolean(false)
@@ -336,7 +360,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
     }
     if (showAudioConvertDialog) {
         AudioConversionDialog(
-            onDismissRequest = { showAudioConvertDialog = false },
+            onDismissRequest = { },
             audioFormat = convertFormat,
             onConfirm = {
                 convertFormat = it
@@ -369,7 +393,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 sortingFields =
                     DownloadUtil.DownloadPreferences.createFromPreferences().toFormatSorter()
             },
-            onDismissRequest = { showFormatSorterDialog = false },
+            onDismissRequest = { },
             showSwitch = false,
             onConfirm = {
                 sortingFields = it
@@ -388,7 +412,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     showVideoClipDialog = false
                 }
             },
-            dismissButton = { DismissButton { showVideoClipDialog = false } },
+            dismissButton = { DismissButton { } },
             text = { Text(stringResource(id = R.string.clip_video_dialog_msg)) },
             title = {
                 Text(
@@ -400,7 +424,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
     }
     if (showMergeAudioDialog) {
         AlertDialog(
-            onDismissRequest = { showMergeAudioDialog = false },
+            onDismissRequest = { },
             icon = { Icon(Icons.Outlined.SpatialAudioOff, null) },
             confirmButton = {
                 ConfirmButton {

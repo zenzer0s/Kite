@@ -1,6 +1,16 @@
 package com.zenzer0s.kite.ui.page.settings.network
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
+import com.zenzer0s.kite.ui.theme.KiteCustomColors
+import com.zenzer0s.kite.ui.theme.GroupedListDefaults
+import com.zenzer0s.kite.ui.component.KitePreferenceSwitchItem
+import com.zenzer0s.kite.ui.component.KitePreferenceItem
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bolt
@@ -63,9 +73,11 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
 
     Scaffold(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             LargeTopAppBar(
-                title = { Text(modifier = Modifier, text = stringResource(id = R.string.network)) },
+                colors = KiteCustomColors.topBarColors,
+title = { Text(modifier = Modifier, text = stringResource(id = R.string.network)) },
                 navigationIcon = { BackButton { onNavigateBack() } },
                 scrollBehavior = scrollBehavior,
             )
@@ -73,7 +85,7 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
         content = {
             val isCustomCommandEnabled by CUSTOM_COMMAND.booleanState
 
-            LazyColumn(contentPadding = it) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 if (isCustomCommandEnabled)
                     item {
                         PreferenceInfo(
@@ -84,13 +96,14 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                 item {
                     var isRateLimitEnabled by remember { mutableStateOf(RATE_LIMIT.getBoolean()) }
 
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 2)),
                         title = stringResource(R.string.rate_limit),
                         description = stringResource(R.string.rate_limit_desc),
                         icon = Icons.Outlined.Speed,
                         enabled = !isCustomCommandEnabled,
-                        isChecked = isRateLimitEnabled,
-                        onChecked = {
+                        checked = isRateLimitEnabled,
+                        onCheckedChange = {
                             isRateLimitEnabled = !isRateLimitEnabled
                             updateValue(RATE_LIMIT, isRateLimitEnabled)
                         },
@@ -101,14 +114,15 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                     var isDownloadWithCellularEnabled by remember {
                         mutableStateOf(CELLULAR_DOWNLOAD.getBoolean())
                     }
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 2)),
                         title = stringResource(R.string.download_with_cellular),
                         description = stringResource(R.string.download_with_cellular_desc),
                         icon =
                             if (isDownloadWithCellularEnabled) Icons.Outlined.SignalCellular4Bar
                             else Icons.Outlined.SignalCellularConnectedNoInternet4Bar,
-                        isChecked = isDownloadWithCellularEnabled,
-                        onClick = {
+                        checked = isDownloadWithCellularEnabled,
+                        onCheckedChange = { _ ->
                             isDownloadWithCellularEnabled = !isDownloadWithCellularEnabled
                             updateValue(CELLULAR_DOWNLOAD, isDownloadWithCellularEnabled)
                         },
@@ -118,24 +132,26 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                 item { PreferenceSubtitle(text = stringResource(id = R.string.advanced_settings)) }
 
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 5)),
                         title = stringResource(R.string.aria2),
                         icon = Icons.Outlined.Bolt,
                         description = stringResource(R.string.aria2_desc),
-                        isChecked = aria2c,
-                        onClick = {
+                        checked = aria2c,
+                        onCheckedChange = { _ ->
                             aria2c = !aria2c
                             updateValue(ARIA2C, aria2c)
                         },
                     )
                 }
                 item {
-                    PreferenceSwitchWithDivider(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 5)),
                         title = stringResource(id = R.string.proxy),
                         description = stringResource(id = R.string.proxy_desc),
                         icon = Icons.Outlined.VpnKey,
-                        isChecked = proxy,
-                        onChecked = {
+                        checked = proxy,
+                        onCheckedChange = {
                             proxy = !proxy
                             PROXY.updateBoolean(proxy)
                         },
@@ -144,7 +160,8 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                     )
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 5)),
                         title = stringResource(id = R.string.concurrent_download),
                         description = stringResource(R.string.concurrent_download_desc),
                         icon = Icons.Outlined.OfflineBolt,
@@ -154,19 +171,21 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                     }
                 }
                 item {
-                    PreferenceSwitch(
+                    KitePreferenceSwitchItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 5)),
                         title = stringResource(R.string.force_ipv4),
                         description = stringResource(id = R.string.force_ipv4_desc),
                         icon = Icons.Outlined.SettingsEthernet,
                         enabled = !isCustomCommandEnabled,
-                        isChecked = forceIpv4,
+                        checked = forceIpv4,
                     ) {
                         forceIpv4 = !forceIpv4
                         FORCE_IPV4.updateBoolean(forceIpv4)
                     }
                 }
                 item {
-                    PreferenceItem(
+                    KitePreferenceItem(
+        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 5)),
                         title = stringResource(R.string.cookies),
                         description = stringResource(R.string.cookies_desc),
                         icon = Icons.Outlined.Cookie,
