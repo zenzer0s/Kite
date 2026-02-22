@@ -132,8 +132,17 @@ androidComponents {
             if (baseAbiCode != null) {
                 output.versionCode.set(baseAbiCode + output.versionCode.get())
             }
-            if (variant.buildType == "release" && abiName != null) {
-                output.outputFileName.set("Kite-${abiName}-release.apk")
+        }
+    }
+}
+
+@Suppress("DEPRECATION")
+android.applicationVariants.configureEach {
+    if (buildType.name == "release") {
+        outputs.configureEach {
+            if (this is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
+                val abi = filters.find { it.filterType == com.android.build.OutputFile.ABI }?.identifier
+                if (abi != null) outputFileName = "Kite-$abi-release.apk"
             }
         }
     }
