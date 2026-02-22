@@ -50,7 +50,10 @@ jobs:
     - name: Rename signed APK
       run: |
         cd app/build/outputs/apk/generic/release
-        for f in *-release-signed.apk; do mv "$f" "${f%-signed.apk}.apk"; done
+        for f in *-release-unsigned-signed.apk; do
+          abi=$(echo "$f" | sed 's/app-generic-\(.*\)-release-unsigned-signed\.apk/\1/')
+          mv "$f" "Kite-${abi}-release.apk"
+        done
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
