@@ -78,13 +78,13 @@ fun TroubleShootingPage(
                         modifier = Modifier,
                         text = stringResource(R.string.issue_tracker_hint),
                     )
-                    val knownIssueUrlSeal = "https://github.com/JunkFood02/Seal/issues/1399"
+                    val knownIssueUrlKite = "https://github.com/zenzer0s/Kite/issues"
                     KitePreferenceItem(
         modifier = Modifier.clip(GroupedListDefaults.getShape(0, 2)),
-                        title = "Seal Issue Tracker",
+                        title = "Kite Issue Tracker",
                         description = null,
                         icon = Icons.AutoMirrored.Outlined.OpenInNew,
-                        onClick = { uriHandler.openUri(knownIssueUrlSeal) },
+                        onClick = { uriHandler.openUri(knownIssueUrlKite) },
                     )
 
                     val knownIssueUrlYtdlp = "https://github.com/yt-dlp/yt-dlp/issues/3766"

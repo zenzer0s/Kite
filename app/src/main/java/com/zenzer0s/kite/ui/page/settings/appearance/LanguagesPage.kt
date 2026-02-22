@@ -49,7 +49,6 @@ import com.zenzer0s.kite.ui.component.BackButton
 import com.zenzer0s.kite.ui.component.PreferenceSingleChoiceItem
 import com.zenzer0s.kite.ui.component.PreferenceSubtitle
 import com.zenzer0s.kite.ui.component.PreferencesHintCard
-import com.zenzer0s.kite.ui.page.settings.about.weblate
 import com.zenzer0s.kite.ui.theme.KiteTheme
 import com.zenzer0s.kite.util.LocaleLanguageCodeMap
 import com.zenzer0s.kite.util.PreferenceUtil
@@ -158,16 +157,6 @@ private fun LanguageBottomSheetImpl(
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(com.zenzer0s.kite.ui.theme.GroupedListDefaults.VerticalSpacing)
         ) {
-            item {
-                PreferencesHintCard(
-                    title = stringResource(R.string.translate),
-                    description = stringResource(R.string.translate_desc),
-                    icon = Icons.Outlined.Translate,
-                ) {
-                    uriHandler.openUri(com.zenzer0s.kite.ui.page.settings.about.weblate)
-                }
-            }
-
             if (suggestedLocales.isNotEmpty()) {
                 item { PreferenceSubtitle(text = stringResource(id = R.string.suggested)) }
                 

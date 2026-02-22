@@ -62,13 +62,11 @@ import com.zenzer0s.kite.util.AUTO_UPDATE
 import com.zenzer0s.kite.util.PreferenceUtil
 import com.zenzer0s.kite.util.ToastUtil
 
-private const val releaseURL = "https://github.com/JunkFood02/Seal/releases"
-private const val repoUrl = "https://github.com/JunkFood02/Seal"
-const val weblate = "https://hosted.weblate.org/engage/seal/"
+private const val releaseURL = "https://github.com/zenzer0s/Kite/releases"
+private const val repoUrl = "https://github.com/zenzer0s/Kite"
 const val YtdlpRepository = "https://github.com/yt-dlp/yt-dlp"
-private const val githubIssueUrl = "https://github.com/JunkFood02/Seal/issues"
-private const val telegramChannelUrl = "https://t.me/seal_app"
-private const val matrixSpaceUrl = "https://matrix.to/#/#seal-space:matrix.org"
+private const val githubIssueUrl = "https://github.com/zenzer0s/Kite/issues"
+private const val telegramChannelUrl = "https://t.me/zen0saospforge"
 private const val TAG = "AboutPage"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +118,7 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
             LazyColumn(modifier = Modifier.fillMaxSize().padding(it), contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(GroupedListDefaults.VerticalSpacing)) {
                 item {
                     KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(0, 6)),
                         title = stringResource(R.string.readme),
                         description = stringResource(R.string.readme_desc),
                         icon = Icons.Outlined.Description,
@@ -130,7 +128,7 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
                 }
                 item {
                     KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(1, 6)),
                         title = stringResource(R.string.release),
                         description = stringResource(R.string.release_desc),
                         icon = Icons.Outlined.NewReleases,
@@ -138,17 +136,9 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
                         openUrl(releaseURL)
                     }
                 }
-                /*            item {
-                    KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 8)),
-                        title = stringResource(R.string.github_issue),
-                        description = stringResource(R.string.github_issue_desc),
-                        icon = Icons.Outlined.ContactSupport,
-                    ) { openUrl(githubIssueUrl) }
-                }*/
                 item {
                     KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(2, 6)),
                         title = stringResource(R.string.telegram_channel),
                         description = telegramChannelUrl,
                         icon = painterResource(id = R.drawable.icons8_telegram_app),
@@ -158,17 +148,7 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
                 }
                 item {
                     KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 8)),
-                        title = stringResource(R.string.matrix_space),
-                        description = matrixSpaceUrl,
-                        icon = painterResource(id = R.drawable.icons8_matrix),
-                    ) {
-                        openUrl(matrixSpaceUrl)
-                    }
-                }
-                item {
-                    KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(5, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(3, 6)),
                         title = stringResource(id = R.string.credits),
                         description = stringResource(id = R.string.credits_desc),
                         icon = Icons.Outlined.AutoAwesome,
@@ -178,7 +158,7 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
                 }
                 item {
                     KitePreferenceSwitchItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(6, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(4, 6)),
                         title = stringResource(R.string.auto_update),
                         description = stringResource(R.string.check_for_updates_desc),
                         icon =
@@ -195,7 +175,7 @@ title = { Text(modifier = Modifier, text = stringResource(id = R.string.about)) 
                 }
                 item {
                     KitePreferenceItem(
-        modifier = Modifier.clip(GroupedListDefaults.getShape(7, 8)),
+        modifier = Modifier.clip(GroupedListDefaults.getShape(5, 6)),
                         title = stringResource(R.string.version),
                         description = versionName,
                         icon = Icons.Outlined.Info,
@@ -230,7 +210,7 @@ fun AutoUpdateUnavailableDialog(onDismissRequest: () -> Unit = {}) {
         val startIndex = text.indexOf(hyperLinkText)
         val endIndex = startIndex + hyperLinkText.length
         addUrlAnnotation(
-            UrlAnnotation("https://github.com/JunkFood02/Seal/releases/latest"),
+            UrlAnnotation("https://github.com/zenzer0s/Kite/releases/latest"),
             start = startIndex,
             end = endIndex,
         )
