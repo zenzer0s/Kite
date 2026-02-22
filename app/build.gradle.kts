@@ -132,6 +132,9 @@ androidComponents {
             if (baseAbiCode != null) {
                 output.versionCode.set(baseAbiCode + output.versionCode.get())
             }
+            if (variant.buildType == "release" && abiName != null) {
+                output.outputFileName.set("Kite-${abiName}-release.apk")
+            }
         }
     }
 }
